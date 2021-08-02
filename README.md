@@ -3,6 +3,7 @@
 采用反射+特性的方式简单实现的依赖注入
 样例
 > 定义一个用户实体类
+
 '''
     class User
     {
@@ -26,7 +27,9 @@
     }
     
 '''
+
 > Program.cs
+
 '''
         static void Main(string[] args)
         {
@@ -40,4 +43,5 @@
             Console.WriteLine($"用户2:{ autoPro.Get<User>("用户2")}");
         }        
 '''
+
 更多的例子请查看 SkyAutoProTest 下的代码
