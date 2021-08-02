@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <PackageId>SkyAutoPro</PackageId>
+    <Version>1.0.4</Version>
+    <Authors>HuHai</Authors>
+    <Description>依赖注入</Description>
+    <PackageLicenseFile>License.txt</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/jkh404/SkyTools</PackageProjectUrl>
+    <PackageTags>Tool;Tools;Sky;SkyTools;SkyTool</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <NeutralLanguage>zh-SG</NeutralLanguage>
+  </PropertyGroup>
+
+</Project>
