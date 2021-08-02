@@ -4,7 +4,7 @@
 样例
 > 定义一个用户实体类
 
-'''c#
+```c#
     class User
     {
         [InTag("用户名")]
@@ -25,9 +25,8 @@
             return JsonConvert.SerializeObject(this);
         }
     }
-'''
-
-'''c#
+```
+```c#
         static void Main(string[] args)
         {
             AutoPro autoPro = new AutoPro();
@@ -39,6 +38,6 @@
             Console.WriteLine($"用户1:{ autoPro.Get<User>("用户1")}");
             Console.WriteLine($"用户2:{ autoPro.Get<User>("用户2")}");
         }        
-'''
+```
 
 更多的例子请查看 SkyAutoProTest 下的代码
