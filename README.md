@@ -4,7 +4,7 @@
 样例
 > 定义一个用户实体类
 
-'''
+'''c#
     class User
     {
         [InTag("用户名")]
@@ -25,12 +25,9 @@
             return JsonConvert.SerializeObject(this);
         }
     }
-    
 '''
 
-> Program.cs
-
-'''
+'''c#
         static void Main(string[] args)
         {
             AutoPro autoPro = new AutoPro();
