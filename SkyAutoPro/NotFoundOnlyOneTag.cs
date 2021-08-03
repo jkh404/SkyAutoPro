@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace SkyAutoPro
 {
+    /// <summary>
+    /// 未指定 OnlyOne 特性错误
+    /// </summary>
     public class NotFoundOnlyOneTag : Exception
     {
         public NotFoundOnlyOneTag(string message) : base(message)

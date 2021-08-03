@@ -25,7 +25,6 @@ namespace SkyAutoProTest
             PassWord = passWord;
             Age = age;
         }
-
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this);

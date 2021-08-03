@@ -42,6 +42,7 @@ namespace SkyAutoProTest
             autoPro.AddList<User>();
             autoPro.AddList<User>();
             autoPro.AddList<User>();
+            autoPro.Add<User>("用户10");
             //autoPro.AddList("用户表",new User("qwe", "qwe123", 18));
             //autoPro.AddList<User>("用户表");
             var users= autoPro.GetList<User>("用户表");
@@ -49,7 +50,9 @@ namespace SkyAutoProTest
             //Console.WriteLine(users.Count);
             autoPro.Add<Tool>("工具");
             Console.WriteLine(autoPro.Get<Tool>());
-            //Console.WriteLine($"{AutoPro.GetTag<User>()}:{autoPro.Get<User>()}");
+            autoPro.Update("用户10",new User("qwe","qwe123",100));
+
+            Console.WriteLine($"{AutoPro.GetTag<User>()}:{autoPro.Get("用户10")}");
         }   
     }       
 }

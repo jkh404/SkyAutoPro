@@ -16,6 +16,11 @@ namespace SkyAutoProTest
         [InTag("工具所属的用户集", GroupTag = "用户表")]
         public List<User> users;
 
+        public Tool(AutoPro autoPro)
+        {
+
+        }
+
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this);
