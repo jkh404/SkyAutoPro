@@ -33,26 +33,16 @@ namespace SkyAutoProTest
         static void Main(string[] args)
         {
             AutoPro autoPro = new AutoPro();
-            autoPro.Add("年龄", 18);
-            autoPro.Add("用户名", "sky");
-            autoPro.Add("密码", "skyqwe");
-            //autoPro.AddOne<User>();
-            //autoPro.AddOne(new User("sky", "skyqwe", 18));//重复添加将报错
-            //autoPro.AddOne<User>();//重复添加将报错
-            autoPro.AddList<User>();
-            autoPro.AddList<User>();
-            autoPro.AddList<User>();
-            autoPro.Add<User>("用户10");
-            //autoPro.AddList("用户表",new User("qwe", "qwe123", 18));
-            //autoPro.AddList<User>("用户表");
-            var users= autoPro.GetList<User>("用户表");
-            //var users2= autoPro.GetList<User>();
-            //Console.WriteLine(users.Count);
-            autoPro.Add<Tool>("工具");
-            Console.WriteLine(autoPro.Get<Tool>());
-            autoPro.Update("用户10",new User("qwe","qwe123",100));
-
-            Console.WriteLine($"{AutoPro.GetTag<User>()}:{autoPro["用户10"]}");
+            autoPro.Add<string>("商场所在城市","上海");
+            autoPro.AddList<Store>();
+            autoPro.AddList<Store>();
+            autoPro.AddList<Store>();
+            autoPro.AddList<Store>();
+            autoPro.AddOne<Mall>();
+            Console.WriteLine(autoPro.Get<Mall>());
+            //商场搬到北京
+            autoPro.Update("商场所在城市", "北京");
+            Console.WriteLine(autoPro.Get<Mall>());
         }   
     }       
 }

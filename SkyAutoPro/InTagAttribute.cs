@@ -12,13 +12,23 @@ namespace SkyAutoPro
   AllowMultiple = false)]
     public class InTagAttribute: Attribute
     {
+        /// <summary>
+        /// 标签
+        /// </summary>
         public string Tag { get; set;}
-        public string GroupTag { get; set;}
+        /// <summary>
+        /// 组标签
+        /// </summary>
+        public string OldTag { get; set;}
+        /// <summary>
+        /// 是否启用更新。为true时Ioc容器里的对象更改时，此次绑定的属性成员将会响应更新。
+        /// </summary>
+        public bool Update { get; set; } = false;
 
-        public InTagAttribute(string tag,string groupTag=null)
+        public InTagAttribute(string tag,string oldTag=null)
         {
             Tag = tag;
-            GroupTag = groupTag;
+            OldTag = oldTag;
         }
     }
 }

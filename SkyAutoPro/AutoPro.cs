@@ -11,6 +11,7 @@ namespace SkyAutoPro
     public sealed class AutoPro:IDisposable
     {
         private Dictionary<string, object> keyValues = new Dictionary<string, object>();
+        private Dictionary<object,PropertyInfo> RegUpdate = new Dictionary<object,PropertyInfo>();
         public AutoPro()
         {
             
@@ -26,6 +27,7 @@ namespace SkyAutoPro
         /// <exception cref="ArgumentException">Tag重复错误</exception>
         public void Add<T>(string tag,T obj) 
         {
+
             
             lock (keyValues)
             {
@@ -80,7 +82,7 @@ namespace SkyAutoPro
         {
             lock (keyValues)
             {
-                string tag = GetTag<T>();
+                string tag = GetOnlyOne<T>();
                 CheckAndAddOne<T>(tag, CreateInstance<T>());
             }
         }
@@ -95,7 +97,7 @@ namespace SkyAutoPro
         {
             lock (keyValues)
             {
-                string tag = GetOnlyTag(obj);
+                string tag = GetOnlyOne(obj);
                 CheckAndAddOne<T>(tag,obj);
             }
         }
@@ -196,6 +198,7 @@ namespace SkyAutoPro
         }
         private void CreateListAndAdd<T>(string tag)
         {
+
             List<T> list = new List<T>();
             list.Add(CreateInstance<T>());
             keyValues.Add(tag, list);
@@ -215,7 +218,7 @@ namespace SkyAutoPro
         {
             lock (keyValues)
             {
-                string tag = GetTag<T>();
+                string tag = GetOnlyOne<T>();
                 return CheckAndUpdate<object>(tag, newObj);
             }
         }
@@ -229,7 +232,7 @@ namespace SkyAutoPro
             lock (keyValues)
             {
                 
-                string tag = GetOnlyTag(newObj);
+                string tag = GetOnlyOne(newObj);
                 return CheckAndUpdate<object>(tag,newObj);
             }
         }
@@ -249,6 +252,7 @@ namespace SkyAutoPro
                 bool isOk = true;
                 return CheckAndUpdate<T>(tag, newObj);
             }
+
         }
 
         /// <summary>
@@ -273,6 +277,13 @@ namespace SkyAutoPro
             object findObj = keyValues.GetValueOrDefault(tag);
             if (findObj == null) return !isOk;
             keyValues[tag] = newObj;
+            RegUpdate.Where(u => {
+                InTagAttribute inTag = u.Value.GetCustomAttribute<InTagAttribute>();
+                if (inTag?.OldTag != null) return inTag.OldTag == tag;
+                else return inTag?.Tag == tag;
+            }).ToList().ForEach((u)=> {
+                u.Value.GetSetMethod()?.Invoke(u.Key,new object[] {newObj});
+            });
             return isOk;
         }
         /// <summary>
@@ -288,28 +299,30 @@ namespace SkyAutoPro
             return groupTag?.Group;
         }
         /// <summary>
-        /// 获取类的GroupTag值
+        /// 获取类的OnlyOneTag值
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <returns>GroupTag</returns>
-        public static string GetTag<T>()
+        public static string GetOnlyOne<T>()
         {
-            OnlyOneAttribute OnlyOne = (OnlyOneAttribute)typeof(T)
-                .GetCustomAttributes(true)
-                .ToList().Find(m => m.GetType() == typeof(OnlyOneAttribute));
-            return OnlyOne?.Tag;
+            return GetOnlyOneTag(typeof(T))?.Tag;
         }
+
         /// <summary>
         /// 获取对象类的OnlyTag值
         /// </summary>
         /// <param name="obj">对象</param>
         /// <returns>OnlyTag</returns>
-        public static string GetOnlyTag(object obj)
+        public static string GetOnlyOne<T>(T obj)
         {
-            OnlyOneAttribute OnlyOne = (OnlyOneAttribute)obj.GetType()
+            return GetOnlyOneTag(obj.GetType())?.Tag;
+        }
+        private static OnlyOneAttribute GetOnlyOneTag(Type type)
+        {
+            OnlyOneAttribute OnlyOne = (OnlyOneAttribute)(type
                 .GetCustomAttributes(true)
-                .ToList().Find(m => m.GetType() == typeof(OnlyOneAttribute));
-            return OnlyOne?.Tag;
+                .ToList().Find(m => m.GetType() == typeof(OnlyOneAttribute)));
+            return OnlyOne;
         }
         /// <summary>
         /// 获取对象的Tag值
@@ -338,26 +351,36 @@ namespace SkyAutoPro
             foreach (var property in properties)
             {
                 InTagAttribute inTag = property.GetCustomAttribute<InTagAttribute>();
-                if (inTag==null)break;
-                object obj = null;
-                if (inTag.GroupTag != null)
+                InOnlyOneTagAttribute inOnlyOne= property.GetCustomAttribute<InOnlyOneTagAttribute>();
+                if (inOnlyOne != null)
                 {
-                    obj= keyValues.GetValueOrDefault(inTag.GroupTag);
+                    property.GetSetMethod()?.Invoke(instance, new object[] { GetOnlyOne<T>() });
+                    continue;
+                }
+                if (inTag==null) continue;
+                if (inTag.Update==true)
+                {
+                    RegUpdate.Add(instance,property);
+                }
+                object obj = null;
+                if (inTag.OldTag != null)
+                {
+                    obj= keyValues.GetValueOrDefault(inTag.OldTag);
                 }
                 else
                 {
                     obj=keyValues.GetValueOrDefault(inTag.Tag);
                 }
-                property.SetValue(instance, obj);
+                property.GetSetMethod()?.Invoke(instance, new object[] { obj });
             }
             foreach (var field in fields)
             {
                 InTagAttribute inTag = field.GetCustomAttribute<InTagAttribute>();
                 if (inTag==null)break;
                 object obj = null;
-                if (inTag.GroupTag != null)
+                if (inTag.OldTag != null)
                 {
-                    obj = keyValues.GetValueOrDefault(inTag.GroupTag);
+                    obj = keyValues.GetValueOrDefault(inTag.OldTag);
                 }
                 else
                 {
@@ -489,7 +512,14 @@ namespace SkyAutoPro
                 return keyValues.Select(u => u.Value).Where(u => u.GetType() == type).ToList();
             }
         }
-        
+        /// <summary>
+        /// 获取容器中的所有对象
+        /// </summary>
+        /// <returns>所有对象</returns>
+        public List<object> GetAll()
+        {
+            return keyValues.Select(u => u.Value).ToList();
+        }
         public void Dispose()
         {
             keyValues.Clear();
