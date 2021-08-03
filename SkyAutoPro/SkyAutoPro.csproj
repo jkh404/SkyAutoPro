@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>SkyAutoPro</PackageId>
-    <Version>1.0.0.1</Version>
+    <Version>1.0.0.3</Version>
     <Authors>HuHai</Authors>
     <Description>依赖注入框架</Description>
     <PackageLicenseFile>License.txt</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/jkh404/SkyAutoPro</PackageProjectUrl>
-    <PackageTags>Sky;Auto;AutoPro;;SkyAutoPro</PackageTags>
+    <PackageTags>Sky;Auto;AutoPro;SkyAutoPro</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
