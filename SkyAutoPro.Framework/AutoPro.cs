@@ -5,16 +5,15 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 
-namespace SkyAutoPro
+namespace SkyAutoPro.Framework
 {
-
-    public sealed class AutoPro:IDisposable
+    public sealed class AutoPro : IDisposable
     {
         private Dictionary<string, object> keyValues = new Dictionary<string, object>();
         public AutoPro()
         {
-            
-            keyValues.Add("AutoPro",this);
+
+            keyValues.Add("AutoPro", this);
         }
         /// <summary>
         /// 添加一个现有对象到IOC容器
@@ -24,9 +23,9 @@ namespace SkyAutoPro
         /// <param name="obj">现有对象</param>
         /// <exception cref="ArgumentNullException">Tag为空值错误</exception>
         /// <exception cref="ArgumentException">Tag重复错误</exception>
-        public void Add<T>(string tag,T obj) 
+        public void Add<T>(string tag, T obj)
         {
-            
+
             lock (keyValues)
             {
                 try
@@ -41,7 +40,7 @@ namespace SkyAutoPro
                 catch (ArgumentException Aex)
                 {
 
-                    throw new ArgumentException($"Tag:{tag}已存在",tag);
+                    throw new ArgumentException($"Tag:{tag}已存在", tag);
                 }
             }
         }
@@ -96,10 +95,10 @@ namespace SkyAutoPro
             lock (keyValues)
             {
                 string tag = GetOnlyTag(obj);
-                CheckAndAddOne<T>(tag,obj);
+                CheckAndAddOne<T>(tag, obj);
             }
         }
-        private void CheckAndAddOne<T>(string tag,T obj)
+        private void CheckAndAddOne<T>(string tag, T obj)
         {
             if (tag == null) throw new NotFoundOnlyOneTag("没有找到OnlyOneTag");
             try
@@ -122,7 +121,7 @@ namespace SkyAutoPro
         {
             lock (keyValues)
             {
-                
+
                 try
                 {
                     bool IsHas = keyValues.ContainsKey(tag);
@@ -228,9 +227,9 @@ namespace SkyAutoPro
         {
             lock (keyValues)
             {
-                
+
                 string tag = GetOnlyTag(newObj);
-                return CheckAndUpdate<object>(tag,newObj);
+                return CheckAndUpdate<object>(tag, newObj);
             }
         }
 
@@ -241,7 +240,7 @@ namespace SkyAutoPro
         /// <param name="tag">对象标签</param>
         /// <param name="newObj">新的对象</param>
         /// <returns>修改是否成功</returns>
-        public bool Update<T>(string tag,T newObj)
+        public bool Update<T>(string tag, T newObj)
         {
 
             lock (keyValues)
@@ -257,13 +256,13 @@ namespace SkyAutoPro
         /// <param name="tag">对象标签</param>
         /// <param name="newObj">新的对象</param>
         /// <returns>修改是否成功</returns>
-        public bool Update(string tag,object newObj)
+        public bool Update(string tag, object newObj)
         {
-            
+
             lock (keyValues)
             {
                 bool isOk = true;
-                return CheckAndUpdate <object>(tag, newObj);
+                return CheckAndUpdate<object>(tag, newObj);
             }
         }
         private bool CheckAndUpdate<T>(string tag, T newObj)
@@ -333,27 +332,27 @@ namespace SkyAutoPro
         public T FillInstance<T>(T instance)
         {
             if (instance == null) return instance;
-            List<PropertyInfo> properties= instance.GetType().GetProperties().ToList();
-            List<FieldInfo> fields= instance.GetType().GetFields().ToList();
+            List<PropertyInfo> properties = instance.GetType().GetProperties().ToList();
+            List<FieldInfo> fields = instance.GetType().GetFields().ToList();
             foreach (var property in properties)
             {
                 InTagAttribute inTag = property.GetCustomAttribute<InTagAttribute>();
-                if (inTag==null)break;
+                if (inTag == null) break;
                 object obj = null;
                 if (inTag.GroupTag != null)
                 {
-                    obj= keyValues.GetValueOrDefault(inTag.GroupTag);
+                    obj = keyValues.GetValueOrDefault(inTag.GroupTag);
                 }
                 else
                 {
-                    obj=keyValues.GetValueOrDefault(inTag.Tag);
+                    obj = keyValues.GetValueOrDefault(inTag.Tag);
                 }
                 property.SetValue(instance, obj);
             }
             foreach (var field in fields)
             {
                 InTagAttribute inTag = field.GetCustomAttribute<InTagAttribute>();
-                if (inTag==null)break;
+                if (inTag == null) break;
                 object obj = null;
                 if (inTag.GroupTag != null)
                 {
@@ -376,13 +375,13 @@ namespace SkyAutoPro
         {
             ConstructorInfo constructor = typeof(T).GetConstructors().Single();
             List<ParameterInfo> parameter = constructor.GetParameters().ToList();
-            object[] objs= parameter.Select(u =>
+            object[] objs = parameter.Select(u =>
             {
                 InTagAttribute inTag = u.GetCustomAttribute<InTagAttribute>();
-                if (inTag==null)
+                if (inTag == null)
                 {
                     List<object> list = keyValues.Select(m => m.Value).ToList();
-                    var obj= list.Where(m =>m.GetType() == u.ParameterType).FirstOrDefault();
+                    var obj = list.Where(m => m.GetType() == u.ParameterType).FirstOrDefault();
                     if (obj == null) return default(T);
                     else return obj;
                 }
@@ -473,7 +472,7 @@ namespace SkyAutoPro
             }
             set
             {
-                Update(tag,value);
+                Update(tag, value);
             }
         }
         /// <summary>
@@ -485,11 +484,11 @@ namespace SkyAutoPro
         {
             get
             {
-                
+
                 return keyValues.Select(u => u.Value).Where(u => u.GetType() == type).ToList();
             }
         }
-        
+
         public void Dispose()
         {
             keyValues.Clear();

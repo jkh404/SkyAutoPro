@@ -52,7 +52,7 @@ namespace SkyAutoProTest
             Console.WriteLine(autoPro.Get<Tool>());
             autoPro.Update("用户10",new User("qwe","qwe123",100));
 
-            Console.WriteLine($"{AutoPro.GetTag<User>()}:{autoPro.Get("用户10")}");
+            Console.WriteLine($"{AutoPro.GetTag<User>()}:{autoPro["用户10"]}");
         }   
     }       
 }
