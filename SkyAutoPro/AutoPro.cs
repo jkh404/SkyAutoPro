@@ -10,7 +10,9 @@ namespace SkyAutoPro
 
     public sealed class AutoPro:IDisposable
     {
-        private Dictionary<string, object> keyValues = new Dictionary<string, object>();
+        private Dictionary<string, KeyValuePair<List<string>, object>> 
+            keyValueGroup = new Dictionary<string, KeyValuePair<List<string>,object>> ();
+        private Dictionary<string, object>keyValues = new Dictionary<string, object>();
         private Dictionary<object,PropertyInfo> RegUpdate = new Dictionary<object,PropertyInfo>();
         public AutoPro()
         {
@@ -25,10 +27,8 @@ namespace SkyAutoPro
         /// <param name="obj">现有对象</param>
         /// <exception cref="ArgumentNullException">Tag为空值错误</exception>
         /// <exception cref="ArgumentException">Tag重复错误</exception>
-        public void Add<T>(string tag,T obj) 
+        public AutoPro Add<T>(string tag,T obj) 
         {
-
-            
             lock (keyValues)
             {
                 try
@@ -45,31 +45,37 @@ namespace SkyAutoPro
 
                     throw new ArgumentException($"Tag:{tag}已存在",tag);
                 }
+                return this;
             }
+
         }
         /// <summary>
         /// 添加一个对象交由IOC容器进行实例化
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="tag">对象标签</param>
+        /// <param name="action">回调动作</param>
         /// <exception cref="ArgumentNullException">Tag为空值错误</exception>
-        /// <exception cref="ArgumentException">Tag重复错误</exception>
-        public void Add<T>(string tag)
+        /// <exception cref="Exception"></exception>
+        public AutoPro Add<T>(string tag,Action<T> action = default(Action<T>))
         {
             lock (keyValues)
             {
                 try
                 {
-                    keyValues.Add(tag, CreateInstance<T>());
+                    T Instance = CreateInstance<T>(tag);
+                    action?.Invoke(Instance);
+                    keyValues.Add(tag, Instance);
                 }
                 catch (ArgumentNullException ANex)
                 {
-                    throw new ArgumentException($"参数 Tag 不能为空值", tag);
+                    throw new ArgumentNullException($"参数 Tag 不能为空值", tag);
                 }
-                catch (ArgumentException Aex)
+                catch (Exception Aex)
                 {
-                    throw new ArgumentException($"Tag:{tag}已存在", tag);
+                    throw Aex;
                 }
+                return this;
             }
         }
         /// <summary>
@@ -78,12 +84,15 @@ namespace SkyAutoPro
         /// <typeparam name="T">对象类型</typeparam>
         /// <exception cref="NotFoundOnlyOneTag">没有找到OnlyOneTag错误</exception>
         /// <exception cref="ArgumentException">Tag重复错误</exception>
-        public void AddOne<T>()
+        public AutoPro AddOne<T>(Action<T> action=default(Action<T>))
         {
             lock (keyValues)
             {
-                string tag = GetOnlyOne<T>();
-                CheckAndAddOne<T>(tag, CreateInstance<T>());
+                string tag = GetOnlyOneTag<T>();
+                T Instance = CreateInstance<T>(tag);
+                action?.Invoke(Instance);
+                CheckAndAddOne<T>(tag, Instance);
+                return this;
             }
         }
         /// <summary>
@@ -93,12 +102,13 @@ namespace SkyAutoPro
         /// <param name="obj">现有对象</param>
         /// <exception cref="NotFoundOnlyOneTag">没有找到OnlyOneTag错误</exception>
         /// <exception cref="ArgumentException">Tag重复错误</exception>
-        public void AddOne<T>(T obj)
+        public AutoPro AddOne<T>(T obj)
         {
             lock (keyValues)
             {
-                string tag = GetOnlyOne(obj);
+                string tag = GetOnlyOneTag(obj);
                 CheckAndAddOne<T>(tag,obj);
+                return this;
             }
         }
         private void CheckAndAddOne<T>(string tag,T obj)
@@ -117,30 +127,32 @@ namespace SkyAutoPro
         /// 将一个对象并添加到列表内
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
-        /// <param name="tag">列表标签</param>
+        /// <param name="objTag">对象标签</param>
         /// <param name="obj">对象</param>
         /// <exception cref="ArgumentNullException">Tag为空值错误</exception>
-        public void AddList<T>(string tag, T obj)
+        public void AddGroup<T>(string objTag, T obj)
         {
             lock (keyValues)
             {
                 
                 try
                 {
-                    bool IsHas = keyValues.ContainsKey(tag);
+                    string GroupTag = GetGroupTag<T>();
+                    bool IsHas = keyValueGroup.ContainsKey(GroupTag);
                     if (!IsHas)
                     {
-                        CreateListAndAdd<T>(tag);
+                        CreateListAndAdd<T>(objTag,obj);
                     }
                     else
                     {
-                        GetListAndAdd<T>(tag);
+                        GetListAndAdd<T>(objTag,obj);
                     }
+
                 }
                 catch (ArgumentNullException ANEx)
                 {
 
-                    throw new ArgumentException($"Tag:{tag}不能为空值", tag);
+                    throw new ArgumentException($"Tag:{objTag}不能为空值", objTag);
                 }
             }
         }
@@ -148,65 +160,58 @@ namespace SkyAutoPro
         /// 由IOC容器实列化一个对象并添加到列表内
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
-        /// <param name="tag">列表标签</param>
+        /// <param name="objTag">列表标签</param>
         /// <exception cref="ArgumentNullException">Tag为空值错误</exception>
-        public void AddList<T>(string tag)
+        public void AddGroup<T>(string objTag)
         {
             lock (keyValues)
             {
+                string groupTag = GetGroupTag<T>();
                 try
                 {
-                    bool IsHas = keyValues.ContainsKey(tag);
+                    
+                    bool IsHas = keyValueGroup.ContainsKey(groupTag);
+                    if (groupTag == null)
+                        throw new NotFoundGroupTag($"{typeof(T).FullName}未指定 GroupTag 特性");
+                    T obj = CreateInstance<T>(objTag);
                     if (!IsHas)
                     {
-                        CreateListAndAdd<T>(tag);
+                        CreateListAndAdd<T>(objTag, obj);
                     }
                     else
                     {
-                        GetListAndAdd<T>(tag);
+                        GetListAndAdd<T>(objTag, obj);
                     }
                 }
                 catch (ArgumentNullException ANEx)
                 {
 
-                    throw new ArgumentException($"Tag:{tag}不能为空值", tag);
+                    throw new ArgumentException($"Tag:{nameof(groupTag)}不能为空值", groupTag);
                 }
             }
         }
-        /// <summary>
-        /// 由IOC容器实列化一个对象并添加到列表内。对象的类需指定 GroupTag 特性
-        /// </summary>
-        /// <typeparam name="T">对象类型</typeparam>
-        /// <exception cref="NotFoundGroupTag">未指定 GroupTag 特性错误</exception>
-        public void AddList<T>()
-        {
-            lock (keyValues)
-            {
-                string group = GetGroup<T>();
-                if (group == null)
-                    throw new NotFoundGroupTag($"{typeof(T).FullName}未指定 GroupTag 特性");
-                bool IsHas = keyValues.ContainsKey(group);
-                if (!IsHas)
-                {
-                    CreateListAndAdd<T>(group);
-                }
-                else
-                {
-                    GetListAndAdd<T>(group);
-                }
-            }
-        }
-        private void CreateListAndAdd<T>(string tag)
+        private void CreateListAndAdd<T>(string objTag,T obj)
         {
 
             List<T> list = new List<T>();
-            list.Add(CreateInstance<T>());
-            keyValues.Add(tag, list);
+            List<string> tags = new List<string>();
+            list.Add(obj);
+            tags.Add(objTag);
+            var Group = new KeyValuePair<List<string>, object>(tags, list);
+            keyValueGroup.Add(GetGroupTag<T>(), Group);
+
         }
-        private void GetListAndAdd<T>(string tag)
+        private void GetListAndAdd<T>(string objTag,T obj)
         {
-            List<T> list = (List<T>)keyValues.GetValueOrDefault(tag);
-            list?.Add(CreateInstance<T>());
+            string groupTag= GetGroupTag<T>();
+            var Group= keyValueGroup.GetValueOrDefault(groupTag);
+            List<T> list = (List<T>)Group.Value;
+            if (list!=null)
+            {
+                if (Group.Key.Contains(objTag)) throw new ArgumentException($"Tag:{objTag}已存在", objTag);
+                Group.Key.Add(objTag);
+                list.Add(obj);
+            }
         }
         /// <summary>
         /// 更新IOC容器内的对象
@@ -218,7 +223,7 @@ namespace SkyAutoPro
         {
             lock (keyValues)
             {
-                string tag = GetOnlyOne<T>();
+                string tag = GetOnlyOneTag<T>();
                 return CheckAndUpdate<object>(tag, newObj);
             }
         }
@@ -232,7 +237,7 @@ namespace SkyAutoPro
             lock (keyValues)
             {
                 
-                string tag = GetOnlyOne(newObj);
+                string tag = GetOnlyOneTag(newObj);
                 return CheckAndUpdate<object>(tag,newObj);
             }
         }
@@ -291,21 +296,25 @@ namespace SkyAutoPro
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <returns>GroupTag</returns>
-        public static string GetGroup<T>()
+        public static string GetGroupTag<T>()
+        {
+            return GetGroupTagAttribute<T>()?.Group;
+        }
+        private static GroupTagAttribute GetGroupTagAttribute<T>()
         {
             GroupTagAttribute groupTag = (GroupTagAttribute)typeof(T)
                .GetCustomAttributes(true)
                .ToList().Find(m => m.GetType() == typeof(GroupTagAttribute));
-            return groupTag?.Group;
+            return groupTag;
         }
         /// <summary>
         /// 获取类的OnlyOneTag值
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <returns>GroupTag</returns>
-        public static string GetOnlyOne<T>()
+        public static string GetOnlyOneTag<T>()
         {
-            return GetOnlyOneTag(typeof(T))?.Tag;
+            return GetOnlyOneAttribute(typeof(T))?.Tag;
         }
 
         /// <summary>
@@ -313,11 +322,11 @@ namespace SkyAutoPro
         /// </summary>
         /// <param name="obj">对象</param>
         /// <returns>OnlyTag</returns>
-        public static string GetOnlyOne<T>(T obj)
+        public static string GetOnlyOneTag<T>(T obj)
         {
-            return GetOnlyOneTag(obj.GetType())?.Tag;
+            return GetOnlyOneAttribute(obj.GetType())?.Tag;
         }
-        private static OnlyOneAttribute GetOnlyOneTag(Type type)
+        private static OnlyOneAttribute GetOnlyOneAttribute(Type type)
         {
             OnlyOneAttribute OnlyOne = (OnlyOneAttribute)(type
                 .GetCustomAttributes(true)
@@ -343,49 +352,40 @@ namespace SkyAutoPro
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="instance">实例化对象</param>
         /// <returns>注入后的实例化对象</returns>
-        public T FillInstance<T>(T instance)
+        public T FillInstance<T>(T instance, string objTag = null)
         {
             if (instance == null) return instance;
             List<PropertyInfo> properties= instance.GetType().GetProperties().ToList();
             List<FieldInfo> fields= instance.GetType().GetFields().ToList();
             foreach (var property in properties)
             {
-                InTagAttribute inTag = property.GetCustomAttribute<InTagAttribute>();
-                InOnlyOneTagAttribute inOnlyOne= property.GetCustomAttribute<InOnlyOneTagAttribute>();
-                if (inOnlyOne != null)
-                {
-                    property.GetSetMethod()?.Invoke(instance, new object[] { GetOnlyOne<T>() });
-                    continue;
-                }
-                if (inTag==null) continue;
-                if (inTag.Update==true)
-                {
-                    RegUpdate.Add(instance,property);
-                }
                 object obj = null;
-                if (inTag.OldTag != null)
+                InTagAttribute inTag = property.GetCustomAttribute<InTagAttribute>();
+                if (inTag==null) continue;//过滤
+                if (inTag.Update==true) RegUpdate.Add(instance,property);
+                string realTag = (inTag.OldTag != null ? inTag.OldTag : inTag.Tag);
+                if (realTag == null)
                 {
-                    obj= keyValues.GetValueOrDefault(inTag.OldTag);
+                    obj = objTag;
                 }
-                else
+                else if(keyValues.ContainsKey(realTag))
                 {
-                    obj=keyValues.GetValueOrDefault(inTag.Tag);
+                    obj = keyValues.GetValueOrDefault(realTag);
+                }
+                else if(keyValueGroup.ContainsKey(realTag))
+                {
+                    obj = keyValueGroup.GetValueOrDefault(realTag).Value;
                 }
                 property.GetSetMethod()?.Invoke(instance, new object[] { obj });
             }
             foreach (var field in fields)
             {
-                InTagAttribute inTag = field.GetCustomAttribute<InTagAttribute>();
-                if (inTag==null)break;
                 object obj = null;
-                if (inTag.OldTag != null)
-                {
-                    obj = keyValues.GetValueOrDefault(inTag.OldTag);
-                }
-                else
-                {
-                    obj = keyValues.GetValueOrDefault(inTag.Tag);
-                }
+                InTagAttribute inTag = field.GetCustomAttribute<InTagAttribute>();
+                if (inTag == null) continue;//过滤
+                if (inTag.OldTag != null) obj = keyValues.GetValueOrDefault(inTag.OldTag);
+                else if (inTag.Tag != null) obj = keyValues.GetValueOrDefault(inTag.Tag);
+                else obj = objTag;
                 field.SetValue(instance, obj);
             }
             return instance;
@@ -395,7 +395,7 @@ namespace SkyAutoPro
         /// </summary>
         /// <typeparam name="T">类</typeparam>
         /// <returns>对象</returns>
-        public T CreateInstance<T>()
+        public T CreateInstance<T>(string objTag=null)
         {
             ConstructorInfo constructor = typeof(T).GetConstructors().Single();
             List<ParameterInfo> parameter = constructor.GetParameters().ToList();
@@ -412,7 +412,7 @@ namespace SkyAutoPro
                 else return Get(inTag.Tag);
             }).ToArray();
             if (objs == null) objs = new object[0];
-            return FillInstance((T)constructor.Invoke(objs));
+            return FillInstance((T)constructor.Invoke(objs), objTag);
         }
         /// <summary>
         /// 根据标签获取对象
@@ -447,41 +447,60 @@ namespace SkyAutoPro
             return default(T);
         }
         /// <summary>
-        /// 根据标签获取列表对象
+        /// 获取列表
         /// </summary>
         /// <typeparam name="T">列表元素类型</typeparam>
-        /// <param name="tag">标签</param>
         /// <returns>列表对象</returns>
-        public List<T> GetList<T>(string tag)
+        public List<T> GetList<T>()
         {
+            string groupTag = GetGroupTag<T>();
             try
             {
-                if (keyValues.ContainsKey(tag)) return (List<T>)keyValues.GetValueOrDefault(tag);
+                if (keyValueGroup.ContainsKey(groupTag)) return (List<T>)keyValueGroup.GetValueOrDefault(groupTag).Value;
                 else return null;
             }
             catch (ArgumentNullException)
             {
-                throw new ArgumentException($"Tag:{tag}不能为空值", tag);
+                throw new ArgumentException($"Tag:{nameof(groupTag)}不能为空值", groupTag);
             }
         }
         /// <summary>
-        /// 获取列表对象
+        /// 获取列表内对象
         /// </summary>
         /// <typeparam name="T">列表元素类型</typeparam>
         /// <returns></returns>
-        public List<T> GetList<T>()
+        public T GetListObj<T>(string objTag)
+        {
+            return GetListObj<T>(GetGroupTag<T>(),objTag);
+        }
+        /// <summary>
+        /// 获取列表内对象
+        /// </summary>
+        /// <typeparam name="T">列表元素类型</typeparam>
+        /// <param name="groupTag">列表Tag</param>
+        /// <param name="objTag">对象Tag</param>
+        /// <returns></returns>
+        public T GetListObj<T>(string groupTag,string objTag)
         {
             try
             {
-                string tag = GetGroup<T>();
-                if (keyValues.ContainsKey(tag)) return (List<T>)keyValues.GetValueOrDefault(tag);
-                else return null;
+                //string groupTag = GetGroupTag<T>();
+                if (keyValueGroup.ContainsKey(groupTag))
+                {
+                    var data = keyValueGroup.GetValueOrDefault(groupTag);
+                    int index = data.Key.FindIndex(m => m == objTag);
+                    if (index > -1) return ((List<T>)data.Value)[index];
+                    return default(T);
+                }
+                else
+                {
+                    return default(T);
+                }
             }
             catch (NotFoundGroupTag)
             {
                 throw new NotFoundGroupTag($"{typeof(T).FullName}未指定 GroupTag 特性");
             }
-
         }
         /// <summary>
         /// 根据tag标签获取或修改对象
@@ -508,7 +527,6 @@ namespace SkyAutoPro
         {
             get
             {
-                
                 return keyValues.Select(u => u.Value).Where(u => u.GetType() == type).ToList();
             }
         }

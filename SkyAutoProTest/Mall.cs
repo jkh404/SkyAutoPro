@@ -10,11 +10,11 @@ namespace SkyAutoProTest
     [OnlyOne("企鹅大商场")]
     internal class Mall
     {
-        [InOnlyOneTag]
+        [InTag]
         public string name { get; set; }
         [InTag("商场内的商店")]
         public List<Store> stores { get; set; }
-        [InTag("商场所在城市")]
+        [InTag("商场所在城市",Update =true)]
         public string City { get; set; }
         public override string ToString()
         {

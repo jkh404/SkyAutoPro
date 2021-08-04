@@ -1,6 +1,8 @@
 ﻿using SkyAutoPro;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 
 namespace SkyAutoProTest
 {
@@ -33,11 +35,15 @@ namespace SkyAutoProTest
         static void Main(string[] args)
         {
             AutoPro autoPro = new AutoPro();
-            autoPro.Add<string>("商场所在城市","上海");
-            autoPro.AddList<Store>();
-            autoPro.AddList<Store>();
-            autoPro.AddList<Store>();
-            autoPro.AddList<Store>();
+            autoPro.Add("商场所在城市", "上海");
+            //autoPro.Add<Store>("玩具商店");
+           // Console.WriteLine(autoPro["玩具商店"]);
+
+            //autoPro.Add("商场所在城市", "上海");
+            autoPro.AddGroup<Store>("商店1");
+            autoPro.AddGroup<Store>("商店2");
+            autoPro.AddGroup<Store>("商店3");
+            autoPro.AddGroup<Store>("商店4");
             autoPro.AddOne<Mall>();
             Console.WriteLine(autoPro.Get<Mall>());
             //商场搬到北京

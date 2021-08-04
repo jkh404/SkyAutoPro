@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace SkyAutoPro
 {
     [AttributeUsage(AttributeTargets.Parameter|
-  AttributeTargets.Field |
-  AttributeTargets.Property,
-  AllowMultiple = false)]
+        AttributeTargets.Field |
+        AttributeTargets.Property,
+        AllowMultiple = false)]
     public class InTagAttribute: Attribute
     {
         /// <summary>
@@ -25,10 +25,11 @@ namespace SkyAutoPro
         /// </summary>
         public bool Update { get; set; } = false;
 
-        public InTagAttribute(string tag,string oldTag=null)
+        public InTagAttribute(string tag=null,string oldTag=null)
         {
             Tag = tag;
             OldTag = oldTag;
         }
+
     }
 }
