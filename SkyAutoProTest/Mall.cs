@@ -11,7 +11,7 @@ namespace SkyAutoProTest
     internal class Mall
     {
         [InTag]
-        public string Name { get; set; }
+        public string Name { get;private set; }
         [InTag("商场内的商店")]
         public List<Store> stores { get; set; }
         [InTag("商场所在城市",Update =true)]

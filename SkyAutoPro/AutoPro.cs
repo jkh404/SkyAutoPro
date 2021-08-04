@@ -289,7 +289,6 @@ namespace SkyAutoPro
             }).ToList().ForEach((u)=> {
                 InTagAttribute inTag = u.Value.GetCustomAttribute<InTagAttribute>();
                 inTag.UpdateData(u.Key,u.Value, newObj);
-                //u.Value.GetSetMethod()?.Invoke(u.Key,new object[] {newObj});
             });
             return isOk;
         }
@@ -357,8 +356,8 @@ namespace SkyAutoPro
         public T FillInstance<T>(T instance, string objTag = null)
         {
             if (instance == null) return instance;
-            List<PropertyInfo> properties= instance.GetType().GetProperties().ToList();
-            List<FieldInfo> fields= instance.GetType().GetFields().ToList();
+            List<PropertyInfo> properties= instance.GetType().GetProperties(BindingFlags.Public|BindingFlags.NonPublic | BindingFlags.Instance).ToList();
+            List<FieldInfo> fields= instance.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).ToList();
             foreach (var property in properties)
             {
                 object obj = null;
@@ -386,10 +385,11 @@ namespace SkyAutoPro
                 object obj = null;
                 InTagAttribute inTag = field.GetCustomAttribute<InTagAttribute>();
                 if (inTag == null) continue;//过滤
-                if (inTag.OldTag != null) obj = keyValues.GetValueOrDefault(inTag.OldTag);
-                else if (inTag.Tag != null) obj = keyValues.GetValueOrDefault(inTag.Tag);
+                string realTag = (inTag.OldTag != null ? inTag.OldTag : inTag.Tag);
+                if (realTag != null) obj = keyValues.GetValueOrDefault(realTag);
                 else obj = objTag;
-                field.SetValue(instance, obj);
+                //field.SetValue(instance, obj);
+                inTag.UpdateData(instance, field, obj);
             }
             return instance;
         }

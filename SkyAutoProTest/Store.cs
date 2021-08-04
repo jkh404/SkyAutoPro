@@ -7,7 +7,7 @@ namespace SkyAutoProTest
     internal class Store
     {
         [InTag]
-        public int Name { get; set; }
+        public string Name { get; private set; }
 
         [InTag("商店所在城市",OldTag = "商场所在城市", Update =true)] 
         public string City { get; set; }
