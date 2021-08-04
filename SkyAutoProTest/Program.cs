@@ -37,7 +37,7 @@ namespace SkyAutoProTest
             AutoPro autoPro = new AutoPro();
             autoPro.Add("商场所在城市", "上海");
             //autoPro.Add<Store>("玩具商店");
-           // Console.WriteLine(autoPro["玩具商店"]);
+            // Console.WriteLine(autoPro["玩具商店"]);
 
             //autoPro.Add("商场所在城市", "上海");
             autoPro.AddGroup<Store>("商店1");

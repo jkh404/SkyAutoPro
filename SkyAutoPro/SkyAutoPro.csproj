@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>SkyAutoPro</PackageId>
-    <Version>1.0.1.0</Version>
-    <Authors>HuHai</Authors>
+    <Version>1.0.1.1</Version>
+    <Authors>hhhx123@foxmail.com</Authors>
     <Description>依赖注入框架</Description>
     <PackageLicenseFile>License.txt</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/jkh404/SkyAutoPro</PackageProjectUrl>

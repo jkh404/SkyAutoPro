@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,11 +26,13 @@ namespace SkyAutoPro
         /// </summary>
         public bool Update { get; set; } = false;
 
-        public InTagAttribute(string tag=null,string oldTag=null)
+        public InTagAttribute(string tag=null)
         {
             Tag = tag;
-            OldTag = oldTag;
         }
-
+        public void UpdateData(object key, PropertyInfo property,object newData)
+        {
+            property.GetSetMethod().Invoke(key, new object[] { newData });
+        }
     }
 }

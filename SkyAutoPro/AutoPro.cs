@@ -287,7 +287,9 @@ namespace SkyAutoPro
                 if (inTag?.OldTag != null) return inTag.OldTag == tag;
                 else return inTag?.Tag == tag;
             }).ToList().ForEach((u)=> {
-                u.Value.GetSetMethod()?.Invoke(u.Key,new object[] {newObj});
+                InTagAttribute inTag = u.Value.GetCustomAttribute<InTagAttribute>();
+                inTag.UpdateData(u.Key,u.Value, newObj);
+                //u.Value.GetSetMethod()?.Invoke(u.Key,new object[] {newObj});
             });
             return isOk;
         }
@@ -376,7 +378,8 @@ namespace SkyAutoPro
                 {
                     obj = keyValueGroup.GetValueOrDefault(realTag).Value;
                 }
-                property.GetSetMethod()?.Invoke(instance, new object[] { obj });
+                //property.GetSetMethod()?.Invoke(instance, new object[] { obj });
+                inTag.UpdateData(instance,property,obj);
             }
             foreach (var field in fields)
             {
