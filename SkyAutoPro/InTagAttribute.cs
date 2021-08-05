@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace SkyAutoPro
 {
+    /// <summary>
+    /// 无参数将默认置入Tag值
+    /// </summary>
     [AttributeUsage(AttributeTargets.Parameter|
         AttributeTargets.Field |
         AttributeTargets.Property,

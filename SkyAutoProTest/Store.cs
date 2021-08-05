@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SkyAutoPro;
+using System.Drawing;
 
 namespace SkyAutoProTest
 {
@@ -11,7 +12,6 @@ namespace SkyAutoProTest
 
         [InTag("商店所在城市",OldTag = "商场所在城市", Update =true)] 
         public string City { get; set; }
-
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this,Formatting.Indented);

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>SkyAutoPro</PackageId>
-    <Version>1.0.1.2</Version>
+    <Version>1.0.1.3</Version>
     <Authors>hhhx123@foxmail.com</Authors>
     <Description>依赖注入框架</Description>
     <PackageLicenseFile>License.txt</PackageLicenseFile>

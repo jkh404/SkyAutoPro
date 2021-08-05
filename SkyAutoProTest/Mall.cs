@@ -7,7 +7,7 @@ namespace SkyAutoProTest
     /// <summary>
     /// 商场
     /// </summary>
-    [OnlyOne("企鹅大商场")]
+    [OnlyOneTag("企鹅大商场")]
     internal class Mall
     {
         [InTag]

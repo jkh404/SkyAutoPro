@@ -315,7 +315,7 @@ namespace SkyAutoPro
         /// <returns>GroupTag</returns>
         public static string GetOnlyOneTag<T>()
         {
-            return GetOnlyOneAttribute(typeof(T))?.Tag;
+            return GetOnlyOneAttribute(typeof(T))?.OnlyOne;
         }
 
         /// <summary>
@@ -325,13 +325,13 @@ namespace SkyAutoPro
         /// <returns>OnlyTag</returns>
         public static string GetOnlyOneTag<T>(T obj)
         {
-            return GetOnlyOneAttribute(obj.GetType())?.Tag;
+            return GetOnlyOneAttribute(obj.GetType())?.OnlyOne;
         }
-        private static OnlyOneAttribute GetOnlyOneAttribute(Type type)
+        private static OnlyOneTagAttribute GetOnlyOneAttribute(Type type)
         {
-            OnlyOneAttribute OnlyOne = (OnlyOneAttribute)(type
+            OnlyOneTagAttribute OnlyOne = (OnlyOneTagAttribute)(type
                 .GetCustomAttributes(true)
-                .ToList().Find(m => m.GetType() == typeof(OnlyOneAttribute)));
+                .ToList().Find(m => m.GetType() == typeof(OnlyOneTagAttribute)));
             return OnlyOne;
         }
         /// <summary>
@@ -400,7 +400,8 @@ namespace SkyAutoPro
         /// <returns>对象</returns>
         public T CreateInstance<T>(string objTag=null)
         {
-            ConstructorInfo constructor = typeof(T).GetConstructors().Single();
+            ConstructorInfo constructor = typeof(T).GetConstructors(
+                BindingFlags.Public| BindingFlags.NonPublic|BindingFlags.Instance).First();
             List<ParameterInfo> parameter = constructor.GetParameters().ToList();
             object[] objs= parameter.Select(u =>
             {

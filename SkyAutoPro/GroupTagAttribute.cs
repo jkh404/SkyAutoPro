@@ -6,14 +6,20 @@ using System.Threading.Tasks;
 
 namespace SkyAutoPro
 {
+    /// <summary>
+    /// 分组标签
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class GroupTagAttribute: Attribute
     {
+        /// <summary>
+        /// 分组Tag
+        /// </summary>
         public string Group { get; set; }
 
-        public GroupTagAttribute( string group)
+        public GroupTagAttribute( string groupTag)
         {
-            Group = group;
+            Group = groupTag;
         }
     }
 }
