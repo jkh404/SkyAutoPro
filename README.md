@@ -2,7 +2,7 @@
 项目开源 GitHub URL:https://github.com/jkh404/SkyAutoPro
 简单的依赖注入框架
 采用反射+特性的方式简单实现的依赖注入
-样例
+#### 样例(Use SkyExcelHelper>=1.0.0 )
 > 定义一个商店实体类和一个商场单例类
 
 ```c#
